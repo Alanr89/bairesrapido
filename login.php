@@ -1,3 +1,77 @@
+<?php
+session_start();
+
+$host = 'localhost';
+$db   = 'baires_rapido';
+$user = 'root';
+$pass = '';
+
+// Conectar sin especificar base de datos para crearla si no existe
+$conn = new mysqli($host, $user, $pass);
+
+if ($conn->connect_error) {
+    die("Error de conexión: " . $conn->connect_error);
+}
+
+// Crear base de datos si no existe
+$conn->query("CREATE DATABASE IF NOT EXISTS $db");
+$conn->select_db($db);
+
+// Crear tabla de usuarios si no existe
+$conn->query("
+    CREATE TABLE IF NOT EXISTS usuarios (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        usuario VARCHAR(50) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        nombre VARCHAR(100),
+        rol ENUM('admin', 'operador') DEFAULT 'operador',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+");
+
+// Insertar usuarios de prueba si no existen
+$conn->query("INSERT IGNORE INTO usuarios (usuario, password, nombre, rol) VALUES ('admin', 'admin', 'Administrador', 'admin')");
+$conn->query("INSERT IGNORE INTO usuarios (usuario, password, nombre, rol) VALUES ('op', 'op', 'Operador', 'operador')");
+
+// Cerrar sesión si se solicita logout
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header("Location: login.php");
+    exit();
+}
+
+$error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $usuario = $_POST['usuario'] ?? '';
+    $password = $_POST['password'] ?? '';
+
+    $stmt = $conn->prepare("SELECT id, usuario, password, nombre, rol FROM usuarios WHERE usuario = ?");
+    $stmt->bind_param("s", $usuario);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($user = $result->fetch_assoc()) {
+        if ($password === $user['password']) {
+            $_SESSION['usuario_id'] = $user['id'];
+            $_SESSION['usuario'] = $user['usuario'];
+            $_SESSION['nombre'] = $user['nombre'];
+            $_SESSION['rol'] = $user['rol'];
+            header("Location: index.php");
+            exit();
+        } else {
+            $error = "Contraseña incorrecta";
+        }
+    } else {
+        $error = "Usuario no encontrado";
+    }
+
+    $stmt->close();
+}
+
+$conn->close();
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -81,7 +155,7 @@
     <div class="login-card">
         <img src="assets/GrupoBaires.jpg" alt="Grupo Baires" class="logo">
         
-        <form action="index.php" method="POST">
+        <form action="login.php" method="POST">
             <div class="form-group">
                 <label for="usuario">Usuario</label>
                 <input type="text" id="usuario" name="usuario" placeholder="Ingrese su usuario" required>
@@ -94,6 +168,10 @@
             
             <button type="submit" class="btn-login">Acceder</button>
         </form>
+
+        <?php if ($error): ?>
+            <p style="color: #d32f2f; margin-top: 15px; font-size: 14px;"><?= htmlspecialchars($error) ?></p>
+        <?php endif; ?>
 
         <p class="footer-text">© 2026 Baires Rápido - Sistema de Operaciones</p>
     </div>

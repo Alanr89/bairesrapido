@@ -1,3 +1,14 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['usuario_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$rol = $_SESSION['rol'] ?? 'operador';
+$nombre = $_SESSION['nombre'] ?? 'Usuario';
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -19,22 +30,27 @@
         h1 { color: var(--primary); margin-bottom: 10px; }
         .subtitle { color: #666; margin-bottom: 30px; }
         hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
+        .modulo-grid { display: flex; gap: 15px; justify-content: center; margin-top: 30px; flex-wrap: wrap; }
+        .modulo-btn { padding: 15px 30px; border: none; border-radius: 8px; background: var(--primary); color: white; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .modulo-btn:hover { background: var(--accent); transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
     </style>
 </head>
 <body>
     <aside class="sidebar">
         <div class="logo-container"><img src="assets/LogoHeader.jpg" alt="Logo" class="logo"></div>
         <nav class="nav-menu">
-            <button class="nav-btn active" onclick="showModule('inicio', this)">Inicio</button>
-            <button class="nav-btn" onclick="showModule('casos', this)">Casos</button>
+            <?php if ($rol === 'admin'): ?>
+                <button class="nav-btn active" onclick="showModule('inicio', this)">Inicio</button>
+            <?php endif; ?>
+            <button class="nav-btn <?= $rol === 'operador' ? 'active' : '' ?>" onclick="showModule('casos', this)">Casos</button>
             <button class="nav-btn" onclick="showModule('coordinacion', this)">Coordinación</button>
-            <button class="nav-btn" onclick="window.location.href='login.php'">Salir</button>
+            <button class="nav-btn" onclick="window.location.href='login.php?logout=1'">Salir</button>
         </nav>
     </aside>
     <main class="main-content">
         <div id="display-area" class="display-card">
             <h1>Bienvenido al Sistema de Operaciones</h1>
-            <p class="subtitle">Gestión y Coordinación Baires Rápido</p>
+            <p class="subtitle">Gestión y Coordinación</p>
             <hr>
             <p>Seleccione un módulo para comenzar.</p>
         </div>
@@ -43,15 +59,26 @@
         function showModule(m, e) {
             const d = document.getElementById('display-area');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            e.classList.add('active');
+            if(e) {
+                e.classList.add('active');
+            }
             if(m === 'inicio') {
-                d.innerHTML = '<h1>Bienvenido</h1><p class=\"subtitle\">Gestión y Coordinación</p><hr><p>Seleccione un módulo.</p>';
+                d.innerHTML = '<h1>Bienvenido</h1><p class=\"subtitle\">Gestión y Coordinación</p><hr><p>Seleccione un módulo para comenzar.</p><div class=\"modulo-grid\"><button class=\"modulo-btn\">Usuarios</button><button class=\"modulo-btn\">Flota</button><button class=\"modulo-btn\">Compañías</button></div>';
             } else if(m === 'casos') {
                 d.innerHTML = '<h1>Módulo de Casos</h1><p class=\"subtitle\">Seguimiento de Operaciones</p><hr><p>Panel de gestión de casos.</p>';
             } else if(m === 'coordinacion') {
                 d.innerHTML = '<h1>Módulo de Coordinación</h1><p class=\"subtitle\">Asignación de Recursos</p><hr><p>Panel de coordinación.</p>';
             }
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const rol = '<?= $rol ?>';
+            if (rol === 'admin') {
+                showModule('inicio', document.querySelector('.nav-btn.active'));
+            } else {
+                showModule('casos', document.querySelector('.nav-btn.active'));
+            }
+        });
     </script>
 </body>
 </html>

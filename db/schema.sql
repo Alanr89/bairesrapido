@@ -6,11 +6,13 @@ CREATE TABLE IF NOT EXISTS usuarios (
     usuario VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     nombre VARCHAR(100),
-    rol ENUM('admin', 'operador', 'coordinador') DEFAULT 'operador',
+    rol ENUM('admin', 'operador') DEFAULT 'operador',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Usuario de prueba (password: admin123)
--- Nota: En un sistema real, las contraseñas deben estar hasheadas.
+-- Usuarios de prueba
 INSERT INTO usuarios (usuario, password, nombre, rol) 
-VALUES ('admin', 'admin123', 'Administrador', 'admin');
+VALUES ('admin', 'admin', 'Administrador', 'admin');
+
+INSERT INTO usuarios (usuario, password, nombre, rol) 
+VALUES ('op', 'op', 'Operador', 'operador');
