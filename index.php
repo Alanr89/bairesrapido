@@ -28,6 +28,7 @@
             <button class="nav-btn active" onclick="showModule('inicio', this)">Inicio</button>
             <button class="nav-btn" onclick="showModule('casos', this)">Casos</button>
             <button class="nav-btn" onclick="showModule('coordinacion', this)">Coordinación</button>
+            <button class="nav-btn" onclick="window.location.href='login.php'">Salir</button>
         </nav>
     </aside>
     <main class="main-content">
