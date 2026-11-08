@@ -41,6 +41,14 @@ hr{border:0;border-top:1px solid #eee;margin:20px 0}
 .autocomplete-list{position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #ddd;border-top:none;border-radius:0 0 6px 6px;max-height:200px;overflow-y:auto;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.15);display:none}
 .autocomplete-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid #eee;font-size:14px;transition:background 0.2s}
 .autocomplete-item:hover{background:#f0f7ff;color:var(--primary)}
+
+/* Tablas de Flota */
+.flota-container{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px}
+@media (max-width: 1000px) { .flota-container { grid-template-columns: 1fr; } }
+.flota-section{background:#fff;border:1px solid #eee;border-radius:10px;padding:15px}
+.flota-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;padding-bottom:10px;border-bottom:1px solid #eee}
+.flota-header h3{color:var(--primary);font-size:18px}
+
 .autocomplete-item:last-child{border-bottom:none}
 .tabla-scroll-container{max-height:520px;overflow-y:auto;border:1px solid #e0e0e0;border-radius:8px}
 .tabla-scroll-container table.usuarios-table{border-radius:0;border:none}
@@ -63,6 +71,51 @@ table.usuarios-table tr.seleccionada{background:#e3f2fd!important}
 
 /* Modal */
 .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:none;justify-content:center;align-items:center;z-index:1000}
+
+<!-- Modal Operario -->
+<div id="modalOperario" class="modal-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:2000">
+    <div class="modal-content" style="background:white;padding:30px;border-radius:12px;width:100%;max-width:400px;box-shadow:0 10px 30px rgba(0,0,0,0.2)">
+        <h2 id="operarioTitulo" style="margin-bottom:20px;color:var(--primary)">Operario</h2>
+        <input type="hidden" id="operarioId">
+        <div class="form-group" style="margin-bottom:15px">
+            <label style="display:block;margin-bottom:5px;font-weight:600">Nombre</label>
+            <input type="text" id="modalOperarioNombre" class="input-buscar" style="width:100%" placeholder="Nombre">
+        </div>
+        <div class="form-group" style="margin-bottom:20px">
+            <label style="display:block;margin-bottom:5px;font-weight:600">Apellido</label>
+            <input type="text" id="modalOperarioApellido" class="input-buscar" style="width:100%" placeholder="Apellido">
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px">
+            <button onclick="document.getElementById('modalOperario').style.display='none'" style="padding:10px 15px;border:none;border-radius:6px;cursor:pointer">Cancelar</button>
+            <button onclick="guardarOperario()" style="background:var(--accent);color:white;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;font-weight:600">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Movil -->
+<div id="modalMovil" class="modal-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:2000">
+    <div class="modal-content" style="background:white;padding:30px;border-radius:12px;width:100%;max-width:400px;box-shadow:0 10px 30px rgba(0,0,0,0.2)">
+        <h2 id="movilTitulo" style="margin-bottom:20px;color:var(--primary)">Móvil</h2>
+        <input type="hidden" id="movilId">
+        <div class="form-group" style="margin-bottom:15px">
+            <label style="display:block;margin-bottom:5px;font-weight:600">Marca</label>
+            <input type="text" id="modalMovilMarca" class="input-buscar" style="width:100%" placeholder="Marca">
+        </div>
+        <div class="form-group" style="margin-bottom:15px">
+            <label style="display:block;margin-bottom:5px;font-weight:600">Modelo</label>
+            <input type="text" id="modalMovilModelo" class="input-buscar" style="width:100%" placeholder="Modelo">
+        </div>
+        <div class="form-group" style="margin-bottom:20px">
+            <label style="display:block;margin-bottom:5px;font-weight:600">Patente</label>
+            <input type="text" id="modalMovilPatente" class="input-buscar" style="width:100%" placeholder="Patente">
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px">
+            <button onclick="document.getElementById('modalMovil').style.display='none'" style="padding:10px 15px;border:none;border-radius:6px;cursor:pointer">Cancelar</button>
+            <button onclick="guardarMovil()" style="background:var(--accent);color:white;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;font-weight:600">Guardar</button>
+        </div>
+    </div>
+</div>
+
 .modal{background:white;border-radius:10px;padding:30px;max-width:450px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.3)}
 .modal h2{margin-top:0;color:var(--primary);font-size:18px}
 .modal p{font-size:15px;color:#333;margin:15px 0}
@@ -121,6 +174,210 @@ function escapeHtml(texto){if(!texto)return'';const div=document.createElement('
 
 document.addEventListener('click',function(e){const lista=document.getElementById('autocompleteList');const input=document.getElementById('inputBuscar');if(lista&&!lista.contains(e.target)&&e.target!==input){lista.style.display='none'}const modalUsuario=document.getElementById('overlayModalUsuario');const modalEliminar=document.getElementById('modalEliminar');if(modalUsuario&&!modalUsuario.contains(e.target)){if(e.target.classList.contains('modal-overlay')){modalUsuario.style.display='none'}}if(modalEliminar&&!modalEliminar.contains(e.target)){if(e.target.classList.contains('modal-overlay')){modalEliminar.style.display='none';pendientesEliminar=[]}}})
 
-function cargarVistaInicio(){const d=document.getElementById('display-area');d.innerHTML='<h1>Bienvenido</h1><p class="subtitle">Gestión y Coordinación</p><hr><p>Seleccione un módulo para comenzar.</p><div class="modulo-grid"><button class="modulo-btn" onclick="cargarVistaUsuarios()">Usuarios</button><button class="modulo-btn" onclick="alert(\'Módulo Flota\')">Flota</button><button class="modulo-btn" onclick="alert(\'Módulo Compañías\')">Compañías</button></div>'}
+
+let todosOperarios = [];
+let todosMoviles = [];
+
+async function cargarVistaFlota() {
+    const d = document.getElementById('display-area');
+    d.innerHTML = `
+        <div class="usuarios-toolbar">
+            <div class="usuarios-actions-left">
+                <h1>Gestión de Flota</h1>
+            </div>
+            <div class="usuarios-actions-right">
+                <button class="btn-buscar" onclick="cargarVistaInicio()">Volver</button>
+            </div>
+        </div>
+        <p class="subtitle">Administración de Operarios y Unidades</p>
+        <hr>
+        <div id="msgAreaFlota"></div>
+        
+        <div class="flota-container">
+            <div class="flota-section">
+                <div class="flota-header">
+                    <h3>Operarios</h3>
+                    <button class="btn-agregar" onclick="abrirModalOperario()">+ Agregar</button>
+                </div>
+                <div class="tabla-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre y Apellido</th>
+                                <th style="text-align:right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpoTablaOperarios"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="flota-section">
+                <div class="flota-header">
+                    <h3>Móviles</h3>
+                    <button class="btn-agregar" onclick="abrirModalMovil()">+ Agregar</button>
+                </div>
+                <div class="tabla-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Marca y Modelo</th>
+                                <th>Patente</th>
+                                <th style="text-align:right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpoTablaMoviles"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+    await Promise.all([cargarOperarios(), cargarMoviles()]);
+}
+
+
+function cargarVistaInicio(){const d=document.getElementById('display-area');d.innerHTML='<h1>Bienvenido</h1><p class="subtitle">Gestión y Coordinación</p><hr><p>Seleccione un módulo para comenzar.</p><div class="modulo-grid"><button class="modulo-btn" onclick="cargarVistaUsuarios()">Usuarios</button><button class="modulo-btn" onclick="cargarVistaFlota()">Flota</button><button class="modulo-btn" onclick="alert(\'Módulo Compañías\')">Compañías</button></div>'}
+
+// Lógica Operarios
+async function cargarOperarios() {
+    try {
+        const resp = await fetch('operarios_api.php');
+        todosOperarios = await resp.json();
+        const tbody = document.getElementById('cuerpoTablaOperarios');
+        tbody.innerHTML = '';
+        todosOperarios.forEach(op => {
+            const fila = document.createElement('tr');
+            fila.innerHTML = `
+                <td><strong>${escapeHtml(op.nombre)} ${escapeHtml(op.apellido)}</strong></td>
+                <td style="text-align:right">
+                    <button class="btn-editar-fila visible" onclick="editarOperario(${op.id})">Editar</button>
+                    <button class="btn-eliminar" style="padding:4px 8px; font-size:12px" onclick="eliminarOperario(${op.id})">X</button>
+                </td>
+            `;
+            tbody.appendChild(fila);
+        });
+    } catch(e) { console.error(e); }
+}
+
+function abrirModalOperario() {
+    document.getElementById('operarioTitulo').textContent = 'Agregar Operario';
+    document.getElementById('operarioId').value = '';
+    document.getElementById('modalOperarioNombre').value = '';
+    document.getElementById('modalOperarioApellido').value = '';
+    document.getElementById('modalOperario').style.display = 'flex';
+}
+
+function editarOperario(id) {
+    const op = todosOperarios.find(x => x.id == id);
+    if (!op) return;
+    document.getElementById('operarioTitulo').textContent = 'Editar Operario';
+    document.getElementById('operarioId').value = op.id;
+    document.getElementById('modalOperarioNombre').value = op.nombre;
+    document.getElementById('modalOperarioApellido').value = op.apellido;
+    document.getElementById('modalOperario').style.display = 'flex';
+}
+
+async function guardarOperario() {
+    const id = document.getElementById('operarioId').value;
+    const nombre = document.getElementById('modalOperarioNombre').value;
+    const apellido = document.getElementById('modalOperarioApellido').value;
+    if (!nombre || !apellido) return alert('Complete los campos');
+    const method = id ? 'PUT' : 'POST';
+    const body = { nombre, apellido };
+    if (id) body.id = id;
+    const resp = await fetch('operarios_api.php', {
+        method,
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(body)
+    });
+    if (resp.ok) {
+        document.getElementById('modalOperario').style.display = 'none';
+        cargarOperarios();
+    }
+}
+
+async function eliminarOperario(id) {
+    if (!confirm('¿Eliminar operario?')) return;
+    const resp = await fetch('operarios_api.php', {
+        method: 'DELETE',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({id})
+    });
+    if (resp.ok) cargarOperarios();
+}
+
+
+
+// Lógica Móviles
+async function cargarMoviles() {
+    try {
+        const resp = await fetch('moviles_api.php');
+        todosMoviles = await resp.json();
+        const tbody = document.getElementById('cuerpoTablaMoviles');
+        tbody.innerHTML = '';
+        todosMoviles.forEach(m => {
+            const fila = document.createElement('tr');
+            fila.innerHTML = `
+                <td><strong>${escapeHtml(m.marca)} ${escapeHtml(m.modelo)}</strong></td>
+                <td><span style="background:#eee; padding:2px 6px; border-radius:4px; font-family:monospace">${escapeHtml(m.patente)}</span></td>
+                <td style="text-align:right">
+                    <button class="btn-editar-fila visible" onclick="editarMovil(${m.id})">Editar</button>
+                    <button class="btn-eliminar" style="padding:4px 8px; font-size:12px" onclick="eliminarMovil(${m.id})">X</button>
+                </td>
+            `;
+            tbody.appendChild(fila);
+        });
+    } catch(e) { console.error(e); }
+}
+
+function abrirModalMovil() {
+    document.getElementById('movilTitulo').textContent = 'Agregar Móvil';
+    document.getElementById('movilId').value = '';
+    document.getElementById('modalMovilMarca').value = '';
+    document.getElementById('modalMovilModelo').value = '';
+    document.getElementById('modalMovilPatente').value = '';
+    document.getElementById('modalMovil').style.display = 'flex';
+}
+
+function editarMovil(id) {
+    const m = todosMoviles.find(x => x.id == id);
+    if (!m) return;
+    document.getElementById('movilTitulo').textContent = 'Editar Móvil';
+    document.getElementById('movilId').value = m.id;
+    document.getElementById('modalMovilMarca').value = m.marca;
+    document.getElementById('modalMovilModelo').value = m.modelo;
+    document.getElementById('modalMovilPatente').value = m.patente;
+    document.getElementById('modalMovil').style.display = 'flex';
+}
+
+async function guardarMovil() {
+    const id = document.getElementById('movilId').value;
+    const marca = document.getElementById('modalMovilMarca').value;
+    const modelo = document.getElementById('modalMovilModelo').value;
+    const patente = document.getElementById('modalMovilPatente').value;
+    if (!marca || !modelo || !patente) return alert('Complete los campos');
+    const method = id ? 'PUT' : 'POST';
+    const body = { marca, modelo, patente };
+    if (id) body.id = id;
+    const resp = await fetch('moviles_api.php', {
+        method,
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(body)
+    });
+    if (resp.ok) {
+        document.getElementById('modalMovil').style.display = 'none';
+        cargarMoviles();
+    }
+}
+
+async function eliminarMovil(id) {
+    if (!confirm('¿Eliminar móvil?')) return;
+    const resp = await fetch('moviles_api.php', {
+        method: 'DELETE',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({id})
+    });
+    if (resp.ok) cargarMoviles();
+}
 
 </script></html>
